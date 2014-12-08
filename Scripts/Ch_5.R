@@ -136,27 +136,6 @@ leveneTest(count ~ spray, data = InsectSprays, center = mean)
 bartlett.test(count ~ spray, data = InsectSprays)
 fligner.test(count ~ spray, data = InsectSprays)
 
-library(mice)
-md.pattern(sleep)
-matrixplot(sleep)
-
-# Формируем матрицу со значениями 1 в местах пропусков:
-x <- as.data.frame (abs (is.na (sleep)))
-y <- x[which(sd(x) > 0)]
-print(cor(y),4)
-cor(sleep, y, use = "pairwise.complete.obs")
-
-imp <- mice(sleep, seed = 1234)
-fit <- with(imp, lm(Dream ~ Span + Gest))
-pooled <- pool(fit)
-summary(pooled)
-
-#  Заполнение пропусков и сохранение результата:
-sleep_imp3 <- complete(imp, action = 3)
-head(sleep_imp3)
-sleep[!complete.cases(sleep_imp3),]
-save(sleep_imp3, file="sleep_imp")
-
 #-----------------------------------------------------------------------	
 #  К разделу 5.5.
 #-----------------------------------------------------------------------	
