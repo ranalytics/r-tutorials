@@ -146,7 +146,8 @@ summary(M1)
 M0 <- glm(dead ~ 1, family = binomial(link = "probit"), data = df)
 anova(M1,M0, test = "Chisq")
 
-df.plot = data.frame(df, p = M1$fit, пробит = predict(M1, type =  "link"))
+df.plot = data.frame(df, p = M1$fit, пробит = predict(M1, type =  "link"),
+                     эффект = df$погибло/(df$погибло+df$выжило))
 df.plot = df.plot[order(df.plot$доза), ]
 
 plot(df.plot$доза, df.plot$p, type="l", lwd = 2, xlab="Доза", ylab="Доля умерших")
@@ -327,6 +328,7 @@ GLM.gaus <- glm(bin.species ~ gr + I(gr^2), family = poisson)
 summary(GLM.gaus)
 GLM.bin <- model.GLM(bin.species, gr, family='binomial')
 anova(GLM.bin, test="Chisq")
+GAM.bin <- model.GAM(bin.species, gr, family='binomial')
 
 GAUS.fun <- function(p, x)  #  Прогнозируемые значения GAUSS
 { exp(p[1] + p[2]*x + p[3]*(x^2)) }
@@ -355,7 +357,7 @@ legend ("topleft", col = c("red", "blue", "green"), lwd = 2,
 data(hellung, package = "ISwR") 
 head(hellung) 
 hellung$glucose <- factor(hellung$glucose, 
-                          labels = c("Да", " Нет"))
+                          labels = c("Да", "Нет"))
 attach(hellung)
 tethym.gluc <- hellung[glucose == "Да", ] 
 tethym.nogluc <- hellung[glucose == "Нет", ] 
@@ -363,7 +365,7 @@ library(car)
 scatterplot(diameter ~ conc)
 points(tethym.gluc$conc,tethym.gluc$diameter, pch = 17)
 legend("topright", legend = c("без глюкозы","с глюкозой"), pch = c(1, 17))
-plot(aov(diameter ~ conc + glucose, hellung), with = 1)
+plot(aov(diameter ~ conc + glucose, hellung), wich = 1)
 plot(aov(log10(diameter) ~ log10(conc) + glucose, hellung), which = 1)
 
 # Строим линейную модель:
