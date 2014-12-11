@@ -54,6 +54,7 @@ library(lattice)
 splom(cars)
 
 # Строим еще один вариант графика:
+library(GGally)
 ggpairs(cars, 
         upper = list(continuous = "density", combo = "box"), 
         lower = list(continuous = "points", combo = "dot"))
@@ -94,7 +95,7 @@ M1 <- lm(weight ~ length*month*sex, data = df1)
 DT <- anova(M1)
 
 #  Выводим результаты расчетов в таблицы файлов Word:
-require(stargazer)
+library(stargazer)
 stargazer(M1, type = "html", out = "M1.doc")
 stargazer(DT, type = "html", out = "DT.doc", summary = FALSE)
 
@@ -139,7 +140,7 @@ M <- lm(weight ~ trt, data = tomato)
 summary(M)
 
 # Сравним групповые средние:
-tapply(weight, trt, mean)
+tapply(tomato$weight, tomato$trt, mean)
 
 # Таблица дисперсионного анализа:
 anova(M)
@@ -164,6 +165,90 @@ plot(M1.fit, M1.res, pch = 19, col = 4,
 cor.test(fitted(M2), InsectSprays$count)
 shapiro.test(resid(M))
 library(car) 
+
+
+# Рисунок на стр. 195:
+set.seed(202)
+dat = data.frame(Group = rep(c("A", "B", "C"), each = 1000),
+                 Value = c(
+                         rnorm(n=1000, mean=5, sd=1.2),
+                         rnorm(n=1000, mean=7, sd=1.5),
+                         rnorm(n=1000, mean=15, sd=2)
+                 ))
+
+library(ggplot2)
+p1 = ggplot(dat, aes(x = Value, fill = Group)) + 
+        geom_density(alpha = 0.6) +
+        xlab("Значение") + ylab("Плотность вероятности")
+
+p2 = ggplot(dat, aes(x = Value)) + 
+        geom_density(alpha = 0.6, fill = "blue") +
+        xlab("Значение") + ylab("Плотность вероятности")
+
+# function for grid arrangement of plots:
+multiplot <- function(..., plotlist=NULL, cols) {
+        require(grid)
+        
+        # Make a list from the ... arguments and plotlist
+        plots <- c(list(...), plotlist)
+        
+        numPlots = length(plots)
+        
+        # Make the panel
+        plotCols = cols                          # Number of columns of plots
+        plotRows = ceiling(numPlots/plotCols) # Number of rows needed, calculated from # of cols
+        
+        # Set up the page
+        grid.newpage()
+        pushViewport(viewport(layout = grid.layout(plotRows, plotCols)))
+        vplayout <- function(x, y)
+                viewport(layout.pos.row = x, layout.pos.col = y)
+        
+        # Make each plot, in the correct location
+        for (i in 1:numPlots) {
+                curRow = ceiling(i/plotCols)
+                curCol = (i-1) %% plotCols + 1
+                print(plots[[i]], vp = vplayout(curRow, curCol ))
+        }
+        
+}
+
+multiplot(p1, p2, cols = 2)
+
+# Рис. на стр. 196:
+ggplot(InsectSprays, aes(x = count)) + geom_histogram() +
+        facet_wrap(~spray) +
+        xlab("Число насекомых") + ylab("Частота")
+
+# Рисунки на стр. 197:
+ggplot(InsectSprays, aes(sample = count)) + stat_qq() +
+        facet_wrap(~spray, scales = "free_y") +
+        xlab("Ожидаемые квантили") + ylab("Наблюдаемые значения")
+
+M <- lm(count ~ spray, data = InsectSprays)
+InsectSprays$resids = resid(M)
+
+p3 = ggplot(InsectSprays, aes(x = resids)) + 
+        geom_histogram(aes(y=..density..)) +
+        geom_density(color = "red") + 
+        xlab("Остатки") + ylab("Плотность вероятности")
+
+p4 = ggplot(InsectSprays, aes(sample = resids)) + stat_qq() +
+        xlab("Ожидаемые квантили") + ylab("Наблюдаемые значения")
+
+multiplot(p3, p4, cols = 2)
+
+# Рис. на стр. 198:
+
+set.seed(202)
+ggplot(InsectSprays, aes(x = spray, y = count)) + geom_boxplot() +
+        geom_jitter(alpha = 0.5) +
+        xlab("Инсектицид") + ylab("Число выживших насекомых")
+
+# Рис. на стр. 199:
+InsectSprays$fit = fitted(M)
+ggplot(InsectSprays, aes(x = fit, y = resids)) + geom_point() +
+        xlab("Предсказанные значения") + ylab("Остатки")
 
 # Тест Левене:
 leveneTest(InsectSprays$count, InsectSprays$spray)
@@ -304,6 +389,7 @@ summary(M)
 coef(M)
 vcov(M)
 
+library(multcomp)
 glht(M, linfct = mcp(Water = "Tukey"))
 glht(M, linfct = mcp(Water = c(
         "Rock - Angler = 0",

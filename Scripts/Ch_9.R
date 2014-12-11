@@ -65,7 +65,8 @@ shell.exec("Berus.pdf") # Открываем файл со схемой
 library(sp)
 library(maptools)
 library(ggplot2)
-load(url("http://gadm.org/data/rda/MDG_adm0.RData"))
+library(rgeos)
+load(url("http://biogeo.ucdavis.edu/data/gadm2/R/MDG_adm0.RData"))
 madagascar <- fortify(gadm)
 m <- ggplot() + geom_map(data = madagascar, 
                          aes(map_id = id), 
@@ -80,8 +81,8 @@ mp <- m + geom_point(data = data.frame(Lon = c(45.0, 47.2,
                      aes(Lon, Lat), color = I("red"), size = 3)
 print(mp)
 
-library(geosphere)
 
+library(geosphere)
 # делим на 1000 для выражения расстояния в км:
 distHaversine(c(45.0, -25.0), c(48.5, -15.0))/1000 
 
@@ -221,7 +222,7 @@ print(M, tag = "chart")
 library(maptools)
 
 # Загрузка шейп-файла в формате R:
-load(url("http://gadm.org/data/rda/BLR_adm1.RData"))
+load(url("http://biogeo.ucdavis.edu/data/gadm2/R/BLR_adm1.RData"))
 Regions <- gadm
 rm(gadm)
 
@@ -250,7 +251,7 @@ spplot(Regions, "Population",
        par.settings = list(axis.line = list(col = NA)))
 
 # Вывод на экран картограмм по районам респ. Беларусь:
-load(url("http://gadm.org/data/rda/BLR_adm2.RData"))
+load(url("http://biogeo.ucdavis.edu/data/gadm2/R/BLR_adm2.RData"))
 Counties <- gadm
 
 # Используем генератор случайных чисел:
@@ -267,6 +268,7 @@ spplot(Counties, "Fake", col.regions = plotcol,
        at = brks.eq$brks, # задает границы классов
        par.settings = list(axis.line = list(col = NA)))
 
+library(ggplot2); library(rgeos); library(maptools)
 counties <- fortify(Counties, region = "NAME_2")
 str(counties)
 

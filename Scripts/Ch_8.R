@@ -94,7 +94,8 @@ plot(Year.list, T.winter, ylab="Cредняя температура, град. 
 lines(ksmooth(Year.list, T.winter, "normal", bandwidth = 5), col = "gold")
 lines(ksmooth(Year.list, T.winter, "normal", bandwidth = 15), col = "red")
 lines(ksmooth(Year.list, T.winter, "normal", bandwidth = 25), col = "green")
-lines(ksmooth(Year.list, T.winter, "normal", bandwidth = 50.8), col = "blue", lwd = 2)
+lines(ksmooth(Year.list, T.winter, "normal",
+              bandwidth = 50.8), col = "blue", lwd = 2)
 lines(ksmooth(Year.list, T.winter, "normal", bandwidth = 67.7), col = 1, lwd = 2)
 legend ("bottomright", lwd = c(1,1,1,2,2),
         c("band = 5", "band = 15", "band = 25", "band = 50.8",
@@ -168,7 +169,7 @@ dose.p(M1b, p = 0.5)
 
 # Отдельно для самок и самцов:
 dose.p(M2a, c(1,3))           ## Самки
-dose.p(M2a, c(2,4))		   ## Самцы
+dose.p(M2a, c(2,4))           ## Самцы
 
 # Включаем в модель местообитание змей:
 M3b <- glm(dead ~ доза * местооб, family = binomial(link = "probit"), data = df)
@@ -204,7 +205,8 @@ n.total <- infection$Infected + infection$Noninfected
 prop.inf <- infection$Infected/n.total
 inf.tbl <- cbind(infection$Infected, infection$Noninfected)
 
-M1 <- glm(inf.tbl ~ Day + Depth, family = binomial(link = "logit"), data = infection)
+M1 <- glm(inf.tbl ~ Day + Depth,
+          family = binomial(link = "logit"), data = infection)
 summary(M1)
 
 M2 <- glm(prop.inf ~ Day + Depth, weights = n.total, 

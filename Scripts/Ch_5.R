@@ -116,8 +116,10 @@ power.t.test(delta = 3.0, sd = 1.8, sig.level = 0.05, power = 0.8)
 
 #  Расчет мощности критерия:
 power.t.test(n = 15, delta = 3.0, sd = 1.8, sig.level = 0.05)
-power.t.test(delta = 3.0, sd = 1.8, sig.level = 0.05, power = 0.8, type  = "paired")
-power.t.test(delta = 3.0, sd = 1.8, sig.level = 0.05, power = 0.8, type  = "one.sample")
+power.t.test(delta = 3.0, sd = 1.8, sig.level = 0.05, 
+             power = 0.8, type  = "paired")
+power.t.test(delta = 3.0, sd = 1.8, sig.level = 0.05, 
+             power = 0.8, type  = "one.sample")
 
 #-----------------------------------------------------------------------	
 #  К разделу 5.4.
@@ -263,7 +265,7 @@ data <- read.table(header = TRUE, text = '
 library(reshape2)
 
 # Преобразуем данные в "широкий формат":
-data.wide <- dcast(data, subject ~ time, value_var = "result")
+data.wide <- dcast(data, subject ~ time, value.var = "result")
 data.wide
 ct <- table( data.wide[, c("pre","post")])
 ct
@@ -293,7 +295,8 @@ library(reshape) # для функции melt()
 
 drug.df <- data.frame( melt(drug,
                             id=c("Center", "Group", "Response")))
-library(ggplot2) # графический пакет
+
+library(ggplot2)
 p <- ggplot(data = drug.df, aes(x = Center, y = value, fill = Response)) +
         ylab("%")
 p + geom_bar(stat = "identity", position = "fill") + 
@@ -313,7 +316,7 @@ exptd <- res$expected
 obs <- obs/200 # здесь и ниже, 200 - общее число опрошенных
 sqrt(sum((exptd-obs)^2/exptd))
 
-library(pwr) 
+library(pwr)
 ES.w2(obs)
 
 pwr.chisq.test(w = ES.w2(obs), df = 1, N = 200)

@@ -6,7 +6,7 @@
 #########################################################################
 
 #########################################################################
-# Глава 7.	РЕГРЕССИОННЫЕ МОДЕЛИ ЗАВИСИМОСТЕЙ МЕЖДУ КОЛИЧЕСТВЕННЫМИ ПЕРЕМЕННЫМИ
+# Глава 7.  РЕГРЕССИОННЫЕ МОДЕЛИ ЗАВИСИМОСТЕЙ МЕЖДУ КОЛИЧЕСТВЕННЫМИ ПЕРЕМЕННЫМИ
 #########################################################################
 
 #-----------------------------------------------------------------------
@@ -36,7 +36,7 @@ c(mean(y), sd(y)) # среднее значение и станд. отклон�
 shapiro.test(y) # тест на нормальность распределения
 
 library(ggplot2) # графическое изображение распределения данных
-ggplot(data = Data, aes(x = y)) + geom_histogram() + 
+ggplot(data = data.frame(y), aes(x = y)) + geom_histogram() + 
         ylab("Частота") + xlab("Давление, мм рт. ст.")
 
 # Способы имитации данных
@@ -138,10 +138,26 @@ beta <- summary(M)$coefficients[1]
 SE <- summary(M)$coefficients[2]
 ci.lower <- beta - qt(0.975, df = 23)*SE
 ci.upper <- beta + qt(0.975, df = 23)*SE
-c(i.lower, ci.upper)
+c(ci.lower, ci.upper)
 Uni.upper <- 1/(ci.lower*60^2*24*365.25/3.09e19)
 Uni.lower <- 1/(ci.upper*60^2*24*365.25/3.09e19)
 c(Uni.lower, Uni.upper)
+
+# Рис. на стр. 250:
+library(gamair)
+data(hubble)
+
+boots = vector(mode="list", length=6)
+
+for(i in 1:6){
+        boots[[i]] = hubble[sample(1:24, 24, replace = TRUE), 2:3]  
+}
+
+boots = do.call(rbind.data.frame, boots)
+boots$reps = rep(c("A", "B", "C", "D", "E", "F"), each = 24)
+
+ggplot(boots, aes(x, y)) + geom_point() + facet_wrap(~reps)
+
 
 # Оценка доверительных интервалов параметра бутстрепом:
 regr <- function(data, indices) {
@@ -151,6 +167,7 @@ regr <- function(data, indices) {
         return(summary(fit)$coefficients[1])
 }
 
+library(boot)
 results <- boot(data = hubble, statistic = regr, R = 1000)
 plot(results)
 quantile(results$t, c(0.025, 0.975))
@@ -166,6 +183,23 @@ simulations <- sim(M, 1000)
 hist(simulations@coef, breaks = 30)
 sd(simulations@coef)
 quantile(simulations@coef, c(0.025, 0.975))
+
+# Рис. на стр. 254:
+M <- lm(y ~ x - 1, data = hubble)
+hubble$fit = fitted(M)
+
+p1 = ggplot(hubble, aes(x, y)) + geom_point() +
+        geom_hline(aes(yintercept=mean(hubble$y)), color = "blue") +
+        geom_segment(aes(x = x, y = y, xend = x, yend = mean(hubble$y))) +
+        ggtitle("TSS")
+
+p2 = ggplot(hubble, aes(x, y)) + geom_point() +
+        geom_smooth(method = "lm", se = FALSE, color = "blue") +
+        geom_segment(aes(x = x, y = y, xend = x, yend = fit)) +
+        ggtitle("RSS")
+
+multiplot(p1, p2, cols = 2)
+
 
 #-----------------------------------------------------------------------	
 #   К разделу  7.3. Модели регрессии при различных видах функции потерь
@@ -231,7 +265,7 @@ extract <- function(fit) {
         sigma <- summary(fit)$sigma  # среднеквадратичная ошибка
         R2.adj <- summary(fit)$adj.r.squared  # скорректиров. R2 
         aic <- AIC(fit)           #  АIC-критерий
-        out <- data.frame(sigma=sigma,R2.adj=R2.adj, AIC=aic)
+        out <- data.frame(sigma = sigma, R2.adj = R2.adj, AIC = aic)
         return(out)    }
 result <- lapply(allModel, extract) # Список результатов
 
@@ -306,7 +340,6 @@ summary(m.ppo)
 m.lpo <- lm(log(Q) ~ I(log(W)))
 summary(m.lpo)
 exp(coef(m.lpo)[1])
-sqrt(sum((Q - exp(predict(m.lpo)))^2)/(n-2))
 
 plot(W, Q, type="p",pch = 22, bg="yellow", 
      xlab = "Масса тела, г", ylab = "Потребление кислорода")
@@ -471,7 +504,8 @@ lambda <- M.ridge$GCV[which.min(M.ridge$GCV)]
 (M.ridge1 <- lm.ridge(Sleep ~ ., data = sleep_nl, lambda = lambda))
 beta.M.ridge1 <- coef(M.ridge1)
 m <- length(beta.M.ridge1)
-resid.ridge <- sleep_nl$Sleep - beta.M.ridge1[1] - as.matrix(sleep_nl[,2:m])%*%beta.M.ridge1[2:m]
+resid.ridge <- sleep_nl$Sleep - beta.M.ridge1[1] - 
+        as.matrix(sleep_nl[,2:m])%*%beta.M.ridge1[2:m]
 
 # Найдем число степеней свободы гребневой регрессии:
 d <- svd(as.matrix(sleep_nl[, 2:m]))$d
@@ -490,7 +524,8 @@ plot(M.las, plottype = "coefficients"); plot(M.las, plottype = "Cp")
 set.seed(0); r <- cv.lars(Xmat, sleep_nl[, 1]) 
 (bestfrac <- r$index[which.min(r$cv)])
 
-las.coef <- predict(M.las, Xmat, s = bestfrac, type = "coefficient", mode = "fraction")
+las.coef <- predict(M.las, Xmat, s = bestfrac, 
+                    type = "coefficient", mode = "fraction")
 las.coef  # Получение коэффициентов модели
 
 # Остатки модели:
@@ -501,8 +536,8 @@ rss.lasso <- sum(las.resid^2)/(nrow(sleep_nl) - 7)
 # Регрессия на главные компоненты:
 load(file = "sleep_imp.Rdata")
 sleep_imp <- as.data.frame(scale(sleep_imp3))
-Sleep.pca <- princomp(~ BodyWgt + BrainWgt + Span + Gest + Pred + Exp + Danger, 
-                      data = sleep_imp)
+Sleep.pca <- princomp(~ BodyWgt + BrainWgt + Span + Gest + 
+                              Pred + Exp + Danger, data = sleep_imp)
 summary(Sleep.pca)
 loadings(Sleep.pca)[, 1:3]
 
@@ -631,9 +666,12 @@ lmridge$GCV
 # Выполним несколько итераций для уточнения этого значения
 lm.ridge(y ~ x1 + x2 + x3 + x4 + x5 + x6, data = trdata,
          lambda = seq(6, 8, 0.25))$GCV
-lm.ridge(y ~ x1 + x2 + x3 + x4 + x5 + x6, data = trdata, lambda = seq(6.5, 7, 0.1))$GCV
-lm.ridge(y ~ x1 + x2 + x3 + x4 + x5 + x6, data = trdata, lambda = seq(6.7, 6.9, 0.05))$GCV
-lm.ridge(y ~ x1 + x2 + x3 + x4 + x5 + x6, data = trdata, lambda = seq(6.75, 6.85, 0.01))$GCV
+lm.ridge(y ~ x1 + x2 + x3 + x4 + x5 + x6,
+         data = trdata, lambda = seq(6.5, 7, 0.1))$GCV
+lm.ridge(y ~ x1 + x2 + x3 + x4 + x5 + x6,
+         data = trdata, lambda = seq(6.7, 6.9, 0.05))$GCV
+lm.ridge(y ~ x1 + x2 + x3 + x4 + x5 + x6,
+         data = trdata, lambda = seq(6.75, 6.85, 0.01))$GCV
 
 # Построим четыре модели гребневой регрессии с различными значениями 
 #  lambda: 2.7 (kHKB), 4.0 (kLW), 6.8 (GCV) и 0 (OLS).
@@ -668,11 +706,14 @@ las.CV  # Получение коэффициентов модели
 las.OLS <- predict(M.lasso, as.matrix(trdata[, 2:7]), s = 1,
                    type = "coefficients", mode = "fraction")
 las.OLS
-predlas <- predict.lars(M.lasso, newx = gx, type = "fit", mode = "fraction", s = 0.434)
+predlas <- predict.lars(M.lasso, newx = gx, type = "fit",
+                        mode = "fraction", s = 0.434)
 las1.mspe <- mean( (gy - predlas$fit)^2 )  
-predlas <- predict.lars(M.lasso, newx = gx, type = "fit", mode = "fraction", s = 0.56)
+predlas <- predict.lars(M.lasso, newx = gx, type = "fit",
+                        mode = "fraction", s = 0.56)
 las2.mspe <- mean( (gy - predlas$fit)^2 )  
-predlas <- predict.lars(M.lasso, newx = gx, type = "fit", mode = "fraction", s = 1)
+predlas <- predict.lars(M.lasso, newx = gx, type = "fit",
+                        mode = "fraction", s = 1)
 las3.mspe <- mean( (gy - predlas$fit)^2 )  
 
 # Регрессия на главные компоненты:
