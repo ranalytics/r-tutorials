@@ -136,10 +136,10 @@ CITY$Number[CITY$Number > 10000]
 CITY$Number[CITY$Sex == "Male"] 
 
 # Повторяем те же команды, но с использованием []:
-CITY[3, 4]
-CITY[3, 1:3]
-CITY[3, CITY$Number >10000]
-CITY[3, CITY$Sex == "Male"] 
+CITY[4, 3]
+CITY[1:3, 3]
+CITY[CITY$Number >10000, 3]
+CITY[CITY$Sex == "Male", 3] 
 str(CITY)
 names(CITY)
 head(CITY, n = 3)
@@ -216,7 +216,7 @@ dates.excel <- c("25/02/2008", "24/04/2009",
                  "14/06/2009", "25/07/2010", "04/03/2011")
 strptime(dates.excel, format = "%d/%m/%Y")
 example2 <- c("1jan79", "2jan99", "31jan04", "30aug05")
-strptime(other.dates, "%d%b%y")
+strptime(example2, "%d%b%y") # не работает с русской локалью!
 
 # Объект типа "временной ряд":
 birth <- scan("http://robjhyndman.com/tsdldata/data/nybirths.dat")
@@ -245,16 +245,19 @@ my_exampl <- function(n, func_trans){
 my_exampl(5, log)
 
 # Сравнение длин двух векторов:
-compare <- function(x, y){ nl <- length(x) ; n2 <- length(у)
-                           if(nl!= n2){
-                                   if(nl  > n2){ z=(nl - n2)
-cat("Первый вектор имеет на ", z, " элементов 6ольше \n") } else{ z=(n2 - nl)
-cat("Второй вектор имеет на ", z, " элементов 6ольше \n") } else{
-        cat("Количество элементов одинаково ", nl, "\n") } 
+compare <- function(x, y){ 
+  nl <- length(x); n2 <- length(у)
+  if(nl!= n2) {
+    if(nl  > n2){
+      z=(nl - n2)
+      cat("Первый вектор имеет на ", z, " элементов 6ольше \n") } else {
+        z=(n2 - nl)
+        cat("Второй вектор имеет на ", z, " элементов 6ольше \n") } } else {
+    cat("Количество элементов одинаково ", nl, "\n") } 
 }
 
-х <-  с(1:4)
-у <-  с(1:9)
+х <-  c(1:4)
+у <-  c(1:9)
 compare(х,  у)
 
 # Вычисление доверительных интервалов среднего бутстрепом:
@@ -353,7 +356,7 @@ l <- list(a = list(a1 = "Boo", b1 = 2, c1 = "Eeek"),
 rapply(l,myFun)
 rapply(l, myFun, how = "replace")
 
-х <- sample(l:4, size=50,  replace=T)
+x <- sample(1:4, size=50,  replace=T)
 gr <- as.factor(sample(c("A","B","C","D"),size=50, replace=T))
 tapply(x, gr,sum) 
 
@@ -362,12 +365,12 @@ molluscs <- read.table("http://figshare.com/media/download/98923/97987",
                        header=TRUE, sep="\t", na.strings="NA",
                        dec=".", strip.white=TRUE)
 
-by(molluscs[,4:5], molluscs$Lake, mean)
+by(molluscs[, 4:5], molluscs$Lake, colMeans)
 
 # Примеры функции outer:
-х <-  1:5 ;  у <-  1:5
-outer(х,у)
+x <- 1:5;  y <- 1:5
+outer(x, y)
 
-х  <-   с("А", "В", "С", "D") 
-у  <-   1:10
-outer(x,  у,   paste,   sep="")
+x <- c("А", "В", "С", "D") 
+y <- 1:10
+outer(x,  y, paste, sep="")

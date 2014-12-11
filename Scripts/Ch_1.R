@@ -11,7 +11,7 @@
 
 # Раздел 1.2
 #-----------------------------------------------------------------------	
-load(url("http://gadm.org/data/rda/BLR_adm1.RData"))
+load(url("http://biogeo.ucdavis.edu/data/gadm2/R/BLR_adm1.RData"))
 
 Regions <- gadm
 rm(gadm)
@@ -39,7 +39,7 @@ cor.test(molluscs$CAnumber, molluscs$ZMlength,
 library(car)
 scatterplot(CAnumber~ ZMlength | Lake, reg.line=lm, smooth=TRUE, spread=TRUE, 
             boxplots='xy', span=0.5, ylab="Численность инфузорий",
-            xlab="Длина раковины", by.groups=FALSE, data=Моллюски)
+            xlab="Длина раковины", by.groups=FALSE, data=molluscs)
 
 #-----------------------------------------------------------------------	
 # Раздел 1.4

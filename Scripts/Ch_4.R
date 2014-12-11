@@ -62,8 +62,7 @@ rownames(mtcars)[which.max(mtcars$mpg)]
 
 # Использование функции apply:
 tapply(X = mtcars$disp, INDEX = mtcars$am, FUN = mean)
-tapply(X = mtcars$disp, INDEX = list(mtcars$am, mtcars$vs),
-       FUN = mean)
+tapply(X = mtcars$disp, INDEX = list(mtcars$am, mtcars$vs), FUN = mean)
 SE <- function(x) {sd(x)/sqrt(length(x))}
 tapply(X = mtcars$disp, INDEX = mtcars$am, FUN = SE)
 
@@ -88,16 +87,20 @@ kurtosis(mtcars$mpg, na.rm = TRUE)
 skewness(mtcars$mpg, na.rm = TRUE)
 
 # Пакет Hmisc, функция describe():
+library(Hmisc)
 describe(mtcars)
 
 # Пакет pastecs, функция stat.desc():
+library(pastecs)
 stat.desc(mtcars)
 
 # Пакет psych, функция describe.by() - расчет параметров
 # описательной статистики для каждого уровня некоторого фактора:
+library(psych)
 describe.by(mtcars, mtcars$am)
 
 # Пакет doBy, функция summaryBy():
+library(doBy)
 summaryBy(mpg + wt ~ cyl + vs, data = mtcars,
           FUN = function(x) { c(m = mean(x), s = sd(x)) } )
 
@@ -134,11 +137,12 @@ grubbs.test(CAnumber_bc, type = 10)
 #-----------------------------------------------------------------------	
 
 #  Заполнение пропусков:
+library(VIM)
 data(sleep, package = "VIM")
 head(sleep)
 
 # список строк, в которых нет пропущенных значений:
-sleep[complete.cases(sleep),]
+sleep[complete.cases(sleep), ]
 
 # список строк, в которых хотя бы одно пропущенное значение:
 sleep[!complete.cases(sleep), ]
@@ -149,10 +153,10 @@ md.pattern(sleep)
 matrixplot(sleep)
 
 # Формируем матрицу со значениями 1 в местах пропусков:
-x <- as.data.frame (abs (is.na (sleep)))
-y <- x[which(sd(x) > 0)]
+x <- as.data.frame (abs (is.na(sleep)))
+y <- x[, which(colSums(x) > 0)]
 print(cor(y),4)
-cor(sleep, y, use="pairwise.complete.obs")
+cor(sleep, x, use="pairwise.complete.obs")
 
 imp <- mice(sleep, seed=1234)
 fit <- with(imp, lm(Dream ~ Span + Gest))
@@ -179,15 +183,86 @@ tapply(example$Variable, example$Factor, summary)
 
 library(ggplot2)
 p <- ggplot(example, aes(x = Variable))
-p <- p + geom_density(aes(fill = Factor), alpha = 1/2)
+(p <- p + geom_density(aes(fill = Factor), alpha = 1/2))
 
 set.seed(1020)
 example = data.frame(
         Factor = rep(c("A", "B", "C"), each = 300),  
-        Variable = c(rnorm(300, 5, 2),rnorm(300, 4, 3),
+        Variable = c(rnorm(300, 5, 2), rnorm(300, 4, 3),
                      rnorm(300, 2, 1)))
 p <- ggplot(example, aes(x = Variable))
-p <- p + geom_density(aes(fill = Factor), alpha = 1/2)
+(p <- p + geom_density(aes(fill = Factor), alpha = 1/2))
+
+# Код для рисунка на стр. 112:
+example1 = data.frame(
+  Factor = rep(c("A", "B", "C"), each = 300),
+  Variable = c(rnorm(300, 5, 2),
+               rnorm(300, 4, 3),
+               rnorm(300, 2, 1)))
+
+example2 = data.frame(
+  Factor = rep(c("A", "B", "C"), each = 300),
+  Variable = c(rnorm(300, 5, 2),
+               rnorm(300, 4, 3),
+               rnorm(300, 2, 1)))
+example3 = data.frame(
+  Factor = rep(c("A", "B", "C"), each = 300),
+  Variable = c(rnorm(300, 5, 2),
+               rnorm(300, 4, 3),
+               rnorm(300, 2, 1)))
+example4 = data.frame(
+  Factor = rep(c("A", "B", "C"), each = 300),
+  Variable = c(rnorm(300, 5, 2),
+               rnorm(300, 4, 3),
+               rnorm(300, 2, 1)))
+require(ggplot2)
+p1 = ggplot(example1, aes(Variable, group = Factor, fill = Factor)) +
+  geom_density(alpha = 1/2)
+p2 = ggplot(example2, aes(Variable, group = Factor, fill = Factor)) +
+  geom_density(alpha = 1/2)
+p3 = ggplot(example3, aes(Variable, group = Factor, fill = Factor)) +
+  geom_density(alpha = 1/2)
+p4 = ggplot(example4, aes(Variable, group = Factor, fill = Factor)) +
+  geom_density(alpha = 1/2)
+
+# Функция для объединения нескольких ggplot2-графиков:
+multiplot <- function(..., plotlist = NULL, cols) {
+  require(grid)
+  
+  plots <- c(list(...), plotlist)
+  
+  numPlots = length(plots)
+  
+  plotCols = cols
+  plotRows = ceiling(numPlots/plotCols)
+  
+  grid.newpage()
+  pushViewport(viewport(layout = grid.layout(plotRows, plotCols)))
+  vplayout <- function(x, y)
+    viewport(layout.pos.row = x, layout.pos.col = y)
+  
+  for (i in 1:numPlots) {
+    curRow = ceiling(i/plotCols)
+    curCol = (i-1) %% plotCols + 1
+    print(plots[[i]], vp = vplayout(curRow, curCol ))
+  }
+  
+}
+
+multiplot(p1, p2, p3, p4, cols = 2)
+
+set.seed(1020)
+example.fixed = data.frame(
+  Factor = rep(c("A", "B", "C"), each = 300),
+  Variable = c(rnorm(300, 5, 2),
+               rnorm(300, 4, 3),
+               rnorm(300, 2, 1)))
+
+p = ggplot(example.fixed, aes(Variable, group = Factor, fill = Factor)) +
+  geom_density(alpha = 1/2)
+
+multiplot(p, p, p, p, cols = 2)
+
 
 #-----------------------------------------------------------------------	
 #  К разделу 4.6.
@@ -198,6 +273,38 @@ dnorm(-1)
 pnorm(-1)
 qnorm(p = c(0.25, 0.75))
 rnorm(10, mean = 0, sd = 1)
+
+# Код для рисунка на стр. 114:
+dstr = rnorm(5000)
+polyCurve <- function(x, y, from, to, n = 50, miny,
+                      col = "red", border = col) {
+        drawPoly <- function(fun, from, to, n = 50, miny, col, border) {
+                Sq <- seq(from = from, to = to, length = n)
+                polygon(x = c(Sq[1], Sq, Sq[n]),
+                        y = c(miny, fun(Sq), miny),
+                        col = col, border = border)
+        }
+        lf <- length(from)
+        stopifnot(identical(lf, length(to)))
+        if(length(col) != lf)
+                col <- rep(col, length.out = lf)
+        if(length(border) != lf)
+                border <- rep(border, length.out = lf)
+        if(missing(miny))
+                miny <- min(y)
+        interp <- approxfun(x = x, y = y)
+        mapply(drawPoly, from = from, to = to, col = col, border = border,
+               MoreArgs = list(fun = interp, n = n, miny = miny))
+        invisible()
+}
+plot(sort(dstr), (1:5000)/5000, type = "l", pch = 19, col = "blue",
+     panel.first = polyCurve(sort(dstr), (1:5000)/5000, 
+                       from = -3, to = -1,
+                       col = "red", border = "black"),
+     ylab = "P", xlab = "x")
+abline(v = -1, lty = 2)
+abline(h = pnorm(-1), lty = 2)
+
 
 #-----------------------------------------------------------------------	
 #  К разделу 4.7.
@@ -290,8 +397,7 @@ c(sum(abs(pr_obs-pr_norm))/nr, sum(abs(pr_obs-pr_pois))/nr)
 c(sum((pr_obs-pr_norm)^2)/nr, sum((pr_obs-pr_pois)^2)/nr)
 
 # Критерий согласия Колмогорова-Смирнова:
-c(ks.test(pr_obs, pr_norm)$statistic, 
-  ks.test(pr_obs, pr_pois)$statistic))
+c(ks.test(pr_obs, pr_norm)$statistic, ks.test(pr_obs, pr_pois)$statistic)
 
 library(vcd)   ##  Visualizing Categorical Data
 gf <- goodfit(table(x), type = "poisson", method = "ML")

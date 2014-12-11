@@ -127,8 +127,8 @@ layout(matrix(1:2, ncol = 2))
 cdplot(ESR ~ fibrinogen, data = plasma)
 cdplot(ESR ~ globulin, data = plasma)
 
-cdplot(ESR ~ fibrinogen, c("coral", "skyblue"), data = plasma)
-cdplot(ESR ~ globulin, c("coral", "skyblue"), data = plasma)
+cdplot(ESR ~ fibrinogen, col = c("coral", "skyblue"), data = plasma)
+cdplot(ESR ~ globulin, col = c("coral", "skyblue"), data = plasma)
 
 cdplot(ESR ~ fibrinogen, col = c("coral", "skyblue"),
        yaxlabels = c("< 20 mm/h", "> 20 mm/h"), data = plasma)
@@ -161,7 +161,7 @@ boxplot(count ~ spray,
         col = "coral", horizontal = TRUE,
         data = InsectSprays)
 
-plot(count ~ spray, data = InsectSprays). 
+plot(count ~ spray, data = InsectSprays)
 
 #  Пример двухмерного "мешка с усами":
 data(Indometh) ; attach(Indometh)
@@ -326,8 +326,9 @@ stripchart(count ~ spray, method="stack",
 #-----------------------------------------------------------------------	
 
 # Категоризованные графики:
-density <- read.delim(file = "http://dl.dropbox.com/u/7521662/Dreissena_in_Naroch_Lake.txt",
-                      header = TRUE)
+density <- read.delim(
+  file = "https://dl.dropboxusercontent.com/u/7521662/Dreissena_in_Naroch_Lake.txt",
+  header = TRUE)
 str(density)
 coplot(Density ~ Depth | Month, data = density,
        xlab = c("Depth", "Month"), ylab = "Density")
@@ -341,14 +342,16 @@ coplot(Density ~ Depth | Month, data = density,
 coplot(Density ~ Depth | Month, data = density,
        panel = function(x, y, ...) {
                panel.smooth(x, y, lty = 2, pch = 19, col = "blue",
-                            span = 0.6)}, # span регулирует кривизну сглаживающей кривой
+                            span = 0.6)}, 
+       # span регулирует кривизну сглаживающей кривой
        bar.bg = c(fac = "coral"), # fac - сокращение от "factor"
        pch = 19, col = "blue",
        xlab = c("Depth", "Month"), ylab = "Density")
 coplot(log(Density + 1) ~ Depth | Month, data = density,
        panel = function(x, y, ...) {
                panel.smooth(x, y, lty = 2, pch = 19, col = "blue",
-                            span = 0.6)}, # span регулирует кривизну сглаживающей кривой
+                            span = 0.6)}, 
+       # span регулирует кривизну сглаживающей кривой
        bar.bg = c(fac = "coral"), # fac - сокращение от "factor"
        pch = 19, col = "blue",
        xlab = c("Depth", "Month"), ylab = "Density")
